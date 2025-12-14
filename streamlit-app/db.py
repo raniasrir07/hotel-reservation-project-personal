@@ -2,7 +2,8 @@ import pandas as pd
 import mysql.connector
 from mysql.connector import Error
 
-DB_HOST = "localhost"
+DB_HOST = "127.0.0.1"
+
 DB_PORT = 3307           # IMPORTANT: docker expose 3307 -> 3306
 DB_USER = "adam"
 DB_PASSWORD = "1234"

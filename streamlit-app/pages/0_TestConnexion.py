@@ -5,7 +5,7 @@ st.title("🔌 Test Connexion MySQL")
 
 try:
     df1 = run_query("SELECT 1 AS ok;")
-    st.success("Connexion MySQL OK ✅")
+    st.success("Connexion MySQL OK : ✅")
     st.dataframe(df1)
 
     st.subheader("Aperçu des villes")
@@ -13,5 +13,5 @@ try:
     st.dataframe(df2)
 
 except Exception as e:
-    st.error("Connexion MySQL échouée ❌")
+    st.error("Connexion MySQL échouée : ❌")
     st.code(str(e))
