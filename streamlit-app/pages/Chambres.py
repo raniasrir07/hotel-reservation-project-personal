@@ -323,4 +323,7 @@ st.sidebar.info(
     **Base :** Chainhotel
     **Tables utilisées :** CHAMBRE, SUITE, HAS_EQUIPEMENT, HAS_ESPACES_DISPO, RESERVATION
     """
+    
+
+
 )
