@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
-from database.connection import get_db_connection
+from utils import get_db_connection
 from datetime import datetime
 
 st.set_page_config(page_title="Consultation & Filtrage des Chambres", page_icon="🔍", layout="wide")
@@ -23,26 +23,26 @@ def execute_query(query, params=None):
 
 
 def get_chambres_with_details():
-    """Récupère toutes les chambres avec leurs détails"""
+    """Récupère toutes les chambres avec leurs détails (correspondance stricte au schéma SQL)"""
     query = """
     SELECT 
         c.Cod_C,
-        c.Surface,
+        c.surface,
         c.numero_etage,
         CASE 
             WHEN s.CHAMBRE_Cod_C IS NOT NULL THEN 'Oui'
             ELSE 'Non'
         END as est_suite,
-        GROUP_CONCAT(DISTINCT he.EQUIPEMENT_Equipement SEPARATOR ', ') as equipements,
+        GROUP_CONCAT(DISTINCT he.EQUIPEMENT_equipement SEPARATOR ', ') as equipements,
         GROUP_CONCAT(DISTINCT hed.ESPACES_DISPO_Espaces_Dispo SEPARATOR ', ') as espaces_dispo,
-        COUNT(DISTINCT r.CHAMBRE_Cod_C) as nombre_reservations,
-        COALESCE(SUM(r.Prix), 0) as revenu_total
+        COUNT(DISTINCT r.date_debut) as nombre_reservations,
+        COALESCE(SUM(r.prix), 0) as revenu_total
     FROM CHAMBRE c
     LEFT JOIN SUITE s ON c.Cod_C = s.CHAMBRE_Cod_C
     LEFT JOIN HAS_EQUIPEMENT he ON c.Cod_C = he.CHAMBRE_Cod_C
     LEFT JOIN HAS_ESPACES_DISPO hed ON s.CHAMBRE_Cod_C = hed.SUITE_CHAMBRE_Cod_C
     LEFT JOIN RESERVATION r ON c.Cod_C = r.CHAMBRE_Cod_C
-    GROUP BY c.Cod_C, c.Surface, c.numero_etage, s.CHAMBRE_Cod_C
+    GROUP BY c.Cod_C, c.surface, c.numero_etage, s.CHAMBRE_Cod_C
     ORDER BY c.Cod_C
     """
     return execute_query(query)
@@ -76,8 +76,8 @@ with col_s2:
     max_surface = st.number_input("Max", value=50.0, min_value=0.0, step=1.0)
 
 # Filtre par équipements
-equipements = execute_query("SELECT DISTINCT EQUIPEMENT_Equipement FROM HAS_EQUIPEMENT ORDER BY EQUIPEMENT_Equipement")
-equip_options = [e['EQUIPEMENT_Equipement'] for e in equipements] if equipements else []
+equipements = execute_query("SELECT DISTINCT EQUIPEMENT_equipement FROM HAS_EQUIPEMENT ORDER BY EQUIPEMENT_equipement")
+equip_options = [e['EQUIPEMENT_equipement'] for e in equipements] if equipements else []
 filter_equip = st.sidebar.multiselect(
     "Équipements:",
     equip_options
@@ -106,7 +106,7 @@ if chambres_data:
     df = pd.DataFrame(chambres_data)
 
     # CORRECTION : Convertir les colonnes numériques
-    df['Surface'] = pd.to_numeric(df['Surface'], errors='coerce')
+    df['surface'] = pd.to_numeric(df['surface'], errors='coerce')
     df['revenu_total'] = pd.to_numeric(df['revenu_total'], errors='coerce')
     df['nombre_reservations'] = pd.to_numeric(df['nombre_reservations'], errors='coerce')
 
@@ -123,7 +123,7 @@ if chambres_data:
             df = df[df['numero_etage'].astype(str).isin(filter_etage)]
 
         # Filtre surface
-        df = df[(df['Surface'] >= min_surface) & (df['Surface'] <= max_surface)]
+        df = df[(df['surface'] >= min_surface) & (df['surface'] <= max_surface)]
 
         # Filtre équipements
         if filter_equip:
@@ -146,7 +146,7 @@ if chambres_data:
         suites = len(df[df['est_suite'] == 'Oui'])
         st.metric("Suites", suites)
     with col3:
-        avg_surface = df['Surface'].mean()
+        avg_surface = df['surface'].mean()
         st.metric("Surface moyenne", f"{avg_surface:.1f} m²")
     with col4:
         total_revenue = df['revenu_total'].sum()
@@ -159,19 +159,19 @@ if chambres_data:
     show_details = st.checkbox("Afficher tous les détails", value=True)
 
     if show_details:
-        columns_to_show = ['Cod_C', 'Surface', 'numero_etage', 'est_suite',
+        columns_to_show = ['Cod_C', 'surface', 'numero_etage', 'est_suite',
                            'equipements', 'espaces_dispo', 'nombre_reservations', 'revenu_total']
         column_names = ['Code', 'Surface (m²)', 'Étage', 'Suite',
                         'Équipements', 'Espaces', 'Réservations', 'Revenu (DH)']
     else:
-        columns_to_show = ['Cod_C', 'Surface', 'numero_etage', 'est_suite', 'nombre_reservations']
+        columns_to_show = ['Cod_C', 'surface', 'numero_etage', 'est_suite', 'nombre_reservations']
         column_names = ['Code', 'Surface (m²)', 'Étage', 'Suite', 'Réservations']
 
     # Créer un DataFrame pour l'affichage
     display_df = df[columns_to_show].copy()
     display_df.columns = column_names
 
-    # CORRECTION : Utiliser 'width' au lieu de 'use_container_width'
+    # CORRECTION : Utiliser 'use_container_width' au lieu de 'width'
     st.dataframe(
         display_df,
         column_config={
@@ -180,7 +180,7 @@ if chambres_data:
             "Réservations": st.column_config.NumberColumn(format="%d")
         },
         hide_index=True,
-        width='stretch',  # CORRECTION ICI
+        use_container_width=True,  # Use the correct argument for Streamlit
         height=400
     )
 
@@ -210,7 +210,7 @@ if chambres_data:
     with tab2:
         # Nuage de points surface vs réservations
         fig2, ax2 = plt.subplots()
-        scatter = ax2.scatter(df['Surface'], df['nombre_reservations'],
+        scatter = ax2.scatter(df['surface'], df['nombre_reservations'],
                               c=df['numero_etage'], cmap='viridis', alpha=0.6, s=100)
         ax2.set_xlabel('Surface (m²)')
         ax2.set_ylabel('Nombre de réservations')
@@ -248,9 +248,11 @@ if chambres_data:
         # Récupérer les détails complets de la chambre
         query_details = """
         SELECT 
-            c.*,
+            c.Cod_C,
+            c.surface,
+            c.numero_etage,
             CASE WHEN s.CHAMBRE_Cod_C IS NOT NULL THEN 'Oui' ELSE 'Non' END as est_suite,
-            GROUP_CONCAT(DISTINCT he.EQUIPEMENT_Equipement) as liste_equipements,
+            GROUP_CONCAT(DISTINCT he.EQUIPEMENT_equipement) as liste_equipements,
             GROUP_CONCAT(DISTINCT hed.ESPACES_DISPO_Espaces_Dispo) as liste_espaces,
             (SELECT COUNT(*) FROM RESERVATION r WHERE r.CHAMBRE_Cod_C = c.Cod_C) as nb_reservations
         FROM CHAMBRE c
@@ -258,7 +260,7 @@ if chambres_data:
         LEFT JOIN HAS_EQUIPEMENT he ON c.Cod_C = he.CHAMBRE_Cod_C
         LEFT JOIN HAS_ESPACES_DISPO hed ON s.CHAMBRE_Cod_C = hed.SUITE_CHAMBRE_Cod_C
         WHERE c.Cod_C = %s
-        GROUP BY c.Cod_C, s.CHAMBRE_Cod_C
+        GROUP BY c.Cod_C, c.surface, c.numero_etage, s.CHAMBRE_Cod_C
         """
 
         details = execute_query(query_details, (selected_chambre,))
@@ -270,7 +272,7 @@ if chambres_data:
 
             with col_d1:
                 st.subheader(f"Chambre {detail['Cod_C']}")
-                st.write(f"**Surface:** {detail['Surface']} m²")
+                st.write(f"**Surface:** {detail['surface']} m²")
                 st.write(f"**Étage:** {detail['numero_etage']}")
                 st.write(f"**Suite:** {detail['est_suite']}")
                 st.write(f"**Réservations:** {detail['nb_reservations']}")
@@ -289,15 +291,15 @@ if chambres_data:
             # Réservations de cette chambre
             query_reservations = """
             SELECT 
-                r.Date_début,
-                r.Date_fin,
-                r.Prix,
+                r.date_debut,
+                r.date_fin,
+                r.prix,
                 a.Cod_A,
-                a.Site_web
+                a.site_web
             FROM RESERVATION r
-            JOIN AGENCE_DE_VOAYAGE a ON r.AGENCE_DE_VOAYAGE_Cod_A = a.Cod_A
+            JOIN AGENCE a ON r.AGENCE_Cod_A = a.Cod_A
             WHERE r.CHAMBRE_Cod_C = %s
-            ORDER BY r.Date_début DESC
+            ORDER BY r.date_debut DESC
             """
 
             reservations = execute_query(query_reservations, (selected_chambre,))
@@ -305,7 +307,7 @@ if chambres_data:
             if reservations:
                 st.subheader("📅 Historique des réservations")
                 res_df = pd.DataFrame(reservations)
-                st.dataframe(res_df, hide_index=True, width='stretch')  # CORRECTION
+                st.dataframe(res_df, hide_index=True, use_container_width=True)  # CORRECTION
 
 else:
     st.warning("Aucune donnée de chambre trouvée dans la base de données.")

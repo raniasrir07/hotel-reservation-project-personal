@@ -4,6 +4,10 @@ import datetime as dt
 import calendar
 import altair as alt  # <-- NOUVEAU: Importer Altair
 from utils import get_db_connection
+
+# st.set_page_config doit toujours être au début
+st.set_page_config(page_title="Réservations - Complet", layout="wide")
+
 st.markdown("""
 <style>
 
@@ -152,9 +156,6 @@ button[data-baseweb="tab"][aria-selected="true"] {
 """, unsafe_allow_html=True)
 # --- 0. CONFIGURATION ---
 
-# st.set_page_config doit toujours être au début
-st.set_page_config(page_title="Réservations - Complet", layout="wide")
-
 st.title("📊 Gestion, Filtrage et Analyse des Réservations")
 
 
@@ -165,8 +166,8 @@ def get_monthly_average_cost(_conn):
     """Calcule le coût journalier moyen par mois pour le graphique."""
     query = """
     SELECT
-        DATE_FORMAT(Date_début, '%Y-%m') AS AnneeMois,
-        AVG(Prix / DATEDIFF(Date_fin, Date_début)) AS Cout_Journalier_Moyen
+        DATE_FORMAT(date_debut, '%Y-%m') AS AnneeMois,
+        AVG(prix / DATEDIFF(date_fin, date_debut)) AS Cout_Journalier_Moyen
     FROM RESERVATION
     GROUP BY AnneeMois
     ORDER BY AnneeMois;
@@ -184,8 +185,8 @@ def get_highest_cost_room_per_month(_conn):
     WITH MonthlyAvgCost AS (
         SELECT
             r.CHAMBRE_Cod_C,
-            DATE_FORMAT(r.Date_début, '%Y-%m') AS AnneeMois,
-            (r.Prix / DATEDIFF(r.Date_fin, Date_début)) AS Cout_Journalier
+            DATE_FORMAT(r.date_debut, '%Y-%m') AS AnneeMois,
+            (r.prix / DATEDIFF(r.date_fin, r.date_debut)) AS Cout_Journalier
         FROM RESERVATION r
     ),
     RankedRooms AS (
@@ -229,7 +230,7 @@ agences_list = ['Toutes']
 if conn:
     try:
         # Récupération de la liste des agences pour le filtre
-        df_agences = pd.read_sql("SELECT Cod_A FROM AGENCE_DE_VOAYAGE", conn)
+        df_agences = pd.read_sql("SELECT Cod_A FROM AGENCE", conn)
         agences_list = ['Toutes'] + df_agences['Cod_A'].astype(str).tolist()
     except Exception as e:
         st.sidebar.error(f"Erreur chargement agences: {e}")
@@ -253,15 +254,15 @@ if conn is not None:
         query1 = """
         SELECT
             R.CHAMBRE_Cod_C AS Code_Chambre,
-            R.Date_début,
-            R.Date_fin,
-            DATEDIFF(R.Date_fin, R.Date_début) AS Durée_Jours,
-            R.Prix,
-            (R.Prix / DATEDIFF(R.Date_fin, R.Date_début)) AS Coût_Journalier,
+            R.date_debut,
+            R.date_fin,
+            DATEDIFF(R.date_fin, R.date_debut) AS Durée_Jours,
+            R.prix,
+            (R.prix / DATEDIFF(R.date_fin, R.date_debut)) AS Coût_Journalier,
             A.Cod_A AS Code_Agence,
             A.Site_web AS Site_Agence
         FROM RESERVATION R
-        INNER JOIN AGENCE_DE_VOAYAGE A ON R.AGENCE_DE_VOAYAGE_Cod_A = A.Cod_A
+        INNER JOIN AGENCE A ON R.AGENCE_Cod_A = A.Cod_A
         WHERE 1=1
         """
 
@@ -272,20 +273,22 @@ if conn is not None:
             query1 += " AND A.Cod_A = %s"
             params1.append(agence_filtre)
         if date_debut_filtre:
-            query1 += " AND R.Date_début >= %s"
+            query1 += " AND R.date_debut >= %s"
             params1.append(date_debut_filtre)
         if date_fin_filtre:
-            query1 += " AND R.Date_fin <= %s"
+            query1 += " AND R.date_fin <= %s"
             params1.append(date_fin_filtre)
 
-        query1 += " ORDER BY R.Date_début DESC"
+        query1 += " ORDER BY R.date_debut DESC"
 
         df_detail = pd.read_sql(query1, conn, params=params1)
 
         if not df_detail.empty:
-            # Formatage des colonnes monétaires
-            df_detail['Prix'] = df_detail['Prix'].apply(lambda x: f"{x:.2f} DH")
-            df_detail['Coût_Journalier'] = df_detail['Coût_Journalier'].apply(lambda x: f"{x:.2f} DH")
+            # Correction: utiliser les bons noms de colonnes (prix, cout_journalier)
+            if 'prix' in df_detail.columns:
+                df_detail['prix'] = df_detail['prix'].apply(lambda x: f"{x:.2f} DH")
+            if 'Coût_Journalier' in df_detail.columns:
+                df_detail['Coût_Journalier'] = df_detail['Coût_Journalier'].apply(lambda x: f"{x:.2f} DH")
             st.dataframe(df_detail, use_container_width=True)
         else:
             st.info("Aucune réservation ne correspond aux filtres sélectionnés.")
@@ -387,9 +390,9 @@ if conn is not None:
             R.CHAMBRE_Cod_C AS Code_Chambre,
             A.Cod_A AS Code_Agence,
             COUNT(*) AS Nb_Reservations,
-            SUM(R.Prix) AS Chiffre_Affaires_Total
+            SUM(R.prix) AS Chiffre_Affaires_Total
         FROM RESERVATION R
-        INNER JOIN AGENCE_DE_VOAYAGE A ON R.AGENCE_DE_VOAYAGE_Cod_A = A.Cod_A
+        INNER JOIN AGENCE A ON R.Agence_Cod_A = A.Cod_A
         WHERE 1=1
         """
 
@@ -400,10 +403,10 @@ if conn is not None:
             query4 += " AND A.Cod_A = %s"
             params4.append(agence_filtre)
         if date_debut_filtre:
-            query4 += " AND R.Date_début >= %s"
+            query4 += " AND R.date_debut >= %s"
             params4.append(date_debut_filtre)
         if date_fin_filtre:
-            query4 += " AND R.Date_fin <= %s"
+            query4 += " AND R.date_fin <= %s"
             params4.append(date_fin_filtre)
 
         query4 += " GROUP BY R.CHAMBRE_Cod_C, A.Cod_A"
