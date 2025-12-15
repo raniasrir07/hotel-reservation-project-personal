@@ -1,30 +1,29 @@
-
 .stApp {
-    background-color: #F5F5F5;
-    color: #4B164C;
+    background-color: #E3E3E3;
+    color: #1B3C53;
     font-family: 'Poppins', sans-serif;
 }
 
 section[data-testid="stSidebar"] {
-    background-color: #4B164C;
-    color: #F5F5F5;
-    box-shadow: 4px 0 10px rgba(75, 22, 76, 0.4);
+    background-color: #1B3C53;
+    color: #E3E3E3;
+    box-shadow: 4px 0 10px rgba(27, 60, 83, 0.4);
 }
 section[data-testid="stSidebar"] * {
-    color: #F5F5F5;
+    color: #E3E3E3;
     font-weight: 500;
 }
 
 [data-testid="stVerticalBlock"] > div:first-child > div:first-child {
-    background-color: #DD88CF;
+    background-color: #456882;
     padding: 25px 30px;
     margin-bottom: 25px;
     border-radius: 0 0 15px 15px;
-    box-shadow: 0 3px 10px rgba(221, 136, 207, 0.3);
+    box-shadow: 0 3px 10px rgba(69, 104, 130, 0.3);
 }
 
 h1, h2, h3 {
-    color: #4B164C;
+    color: #1B3C53;
     font-weight: 700;
 }
 [data-testid="stVerticalBlock"] > div:first-child > div:first-child h1 {
@@ -33,34 +32,34 @@ h1, h2, h3 {
 }
 
 .block-container {
-    background-color: #F8E7F6;
+    background-color: #E3E3E3;
     border-radius: 12px;
     padding: 2.5rem;
     margin-top: 2rem;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-    border-left: 5px solid #DD88CF;
+    border-left: 5px solid #456882;
 }
 
 .st-emotion-cache-1y4v0h-anchor[aria-current="page"] {
-    background-color: #DD88CF;
-    color: white !important;
+    background-color: #234C6A;
+    color: #E3E3E3 !important;
     font-weight: 700;
     border-radius: 6px;
 }
 
 input, select, textarea {
     background-color: #FFFFFF !important;
-    color: #4B164C !important;
+    color: #1B3C53 !important;
     border-radius: 6px !important;
-    border: 1px solid #DD88CF !important;
+    border: 1px solid #456882 !important;
 }
 input:focus, select:focus, textarea:focus {
-    border-color: #4B164C !important;
-    box-shadow: 0 0 0 3px rgba(75, 22, 76, 0.3) !important;
+    border-color: #1B3C53 !important;
+    box-shadow: 0 0 0 3px rgba(27, 60, 83, 0.3) !important;
 }
 
 .stButton > button {
-    background-color: #4B164C;
+    background-color: #1B3C53;
     color: white;
     border-radius: 30px;
     padding: 10px 25px;
@@ -69,7 +68,7 @@ input:focus, select:focus, textarea:focus {
     transition: background-color 0.3s ease, transform 0.3s;
 }
 .stButton > button:hover {
-    background-color: #DD88CF;
+    background-color: #456882;
     transform: translateY(-2px);
 }
 
@@ -80,20 +79,20 @@ input:focus, select:focus, textarea:focus {
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 .stDataFrame > div > div > div:nth-child(1) > div:nth-child(2) > div:nth-child(1) {
-    color: #4B164C !important;
+    color: #1B3C53 !important;
     font-weight: 700;
-    border-bottom: 2px solid #DD88CF;
+    border-bottom: 2px solid #456882;
 }
 
 button[data-baseweb="tab"] {
-    background-color: #F8E7F6;
-    color: #4B164C;
+    background-color: #E3E3E3;
+    color: #1B3C53;
     border-radius: 8px 8px 0 0;
     font-weight: 600;
 }
 button[data-baseweb="tab"][aria-selected="true"] {
-    background-color: #DD88CF;
-    color: white;
+    background-color: #234C6A;
+    color: #E3E3E3;
     font-weight: 700;
 }
 
