@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import os
 from db import get_connection, run_query
 
 # ======================== Page setup ========================
@@ -10,35 +11,10 @@ st.set_page_config(
     layout="wide"
 )
 
-# ======================== Color palette ========================
-# Palette: https://colorhunt.co/palette/1b3c53234c6a456882e3e3e3
-
-st.markdown("""
-<style>
-    .main {
-        background-color: #E3E3E3;
-    }
-    h1, h2, h3 {
-        color: #1B3C53;
-    }
-    .stMetric {
-        background-color: #FFFFFF;
-        padding: 12px;
-        border-radius: 10px;
-        border-left: 6px solid #234C6A;
-    }
-    .stButton > button {
-        background-color: #234C6A;
-        color: white;
-        border-radius: 8px;
-        padding: 10px 22px;
-        font-size: 15px;
-    }
-    .stButton > button:hover {
-        background-color: #1B3C53;
-    }
-</style>
-""", unsafe_allow_html=True)
+# Use global theme
+theme_path = os.path.join(os.path.dirname(__file__), '..', 'theme.css')
+with open(theme_path) as f:
+    st.markdown('<style>' + f.read() + '</style>', unsafe_allow_html=True)
 
 # ======================== Title ========================
 
