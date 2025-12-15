@@ -7,6 +7,8 @@ from datetime import datetime
 st.set_page_config(page_title="Consultation & Filtrage des Chambres", page_icon="🔍", layout="wide")
 st.title("🔍 Consultation & Filtrage des Chambres - Chainhotel")
 
+# Inject global theme CSS
+st.markdown('<style>' + open('theme.css').read() + '</style>', unsafe_allow_html=True)
 
 # ========== FONCTIONS UTILES ==========
 def execute_query(query, params=None):

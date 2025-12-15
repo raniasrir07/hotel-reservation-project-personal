@@ -8,6 +8,9 @@ from utils import get_db_connection
 # st.set_page_config doit toujours être au début
 st.set_page_config(page_title="Réservations - Complet", layout="wide")
 
+# Inject global theme CSS
+st.markdown('<style>' + open('theme.css').read() + '</style>', unsafe_allow_html=True)
+
 st.markdown("""
 <style>
 

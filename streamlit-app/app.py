@@ -3,6 +3,9 @@ from db import run_query
 
 st.set_page_config(page_title="Hotel Reservation", page_icon="🏨", layout="wide")
 
+# Inject global theme CSS
+st.markdown('<style>' + open('theme.css').read() + '</style>', unsafe_allow_html=True)
+
 st.title("🏨 Hotel Reservation Project")
 st.write("Bienvenue dans l'application.")
 
