@@ -1,3 +1,16 @@
+/* Add theme color variables */
+:root {
+    --color-bg: #E3E3E3;
+    --color-primary: #1B3C53;
+    --color-accent: #456882;
+    --color-sidebar: #234C6A;
+    --color-white: #FFFFFF;
+    --color-header: #456882;
+    --color-card-rooms: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+    --color-card-reservations: linear-gradient(135deg, #a73737 0%, #7a2828 100%);
+    --color-card-agencies: linear-gradient(135deg, #38acb9 0%, #177a88 100%);
+}
+
 .stApp {
     background-color: #E3E3E3;
     color: #1B3C53;

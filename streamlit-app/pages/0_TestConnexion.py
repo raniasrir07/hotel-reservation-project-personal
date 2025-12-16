@@ -9,7 +9,7 @@ try:
     st.dataframe(df1)
 
     st.subheader("Aperçu des villes")
-    df2 = run_query("SELECT * FROM VILLE;")
+    df2 = run_query("SELECT * FROM CITY;")
     st.dataframe(df2)
 
 except Exception as e:

@@ -1,141 +1,150 @@
 import streamlit as st
 import pandas as pd
 import os
-from db import get_connection, run_query
+from db import run_query
 
 # ======================== Page setup ========================
 
 st.set_page_config(
-    page_title="Gestion Hôtelière - Agences",
-    page_icon="🏢",
+    page_title="Gestion Hôtelière",
+    page_icon="🏨",
     layout="wide"
 )
 
-# Use global theme
 theme_path = os.path.join(os.path.dirname(__file__), '..', 'theme.css')
 with open(theme_path) as f:
-    st.markdown('<style>' + f.read() + '</style>', unsafe_allow_html=True)
+    st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
-# ======================== Title ========================
+# ======================== Header ========================
 
-st.title("🏢 Gestion des Agences de Voyage")
-st.markdown("---")
+st.title("🏨 Tableau de bord – Gestion Hôtelière")
+st.caption("Vue globale des agences & chambres disponibles")
+st.divider()
 
-# ======================== Data loading ========================
+# ======================== DATA : AGENCES ========================
 
 sql_agences = """
 SELECT
-    a.Cod_A AS code_agence,
-    a.telephone,
-    a.site_web,
-    a.Adresse_Rue_A,
-    a.Adresse_Num_A,
-    a.Adresse_Code_Postal,
-    a.Adresse_Pays_A,
-    v.nom AS ville,
-    v.latitude,
-    v.longitude,
-    v.region,
-    v.pays
-FROM AGENCE a
-JOIN VILLE v ON a.VILLE_Id_ville = v.Id_ville
+    a.CodA AS code_agence,
+    a.Tel AS telephone,
+    a.WebSite AS site_web,
+    CONCAT(a.Street_Address, ' ', a.Num_Address, ', ', c.Name) AS adresse_complete,
+    c.Name AS ville,
+    c.Latitude AS latitude,
+    c.Longitude AS longitude
+FROM TRAVEL_AGENCY a
+JOIN CITY c ON a.City_Address = c.Name
 """
 
-try:
-    df_agences = run_query(sql_agences)
-except RuntimeError as e:
-    st.error("❌ Erreur lors de l'accès à la base de données")
-    st.exception(e)
-    st.stop()
+df_agences = run_query(sql_agences)
 
-if df_agences.empty:
-    st.warning("⚠️ Aucune agence trouvée dans la base")
-    st.stop()
+# ======================== METRICS ========================
 
-# ======================== Calculated columns ========================
+st.subheader("📊 Indicateurs clés")
 
-df_agences["adresse_complete"] = (
-    df_agences["Adresse_Rue_A"] + " " +
-    df_agences["Adresse_Num_A"] + ", " +
-    df_agences["Adresse_Code_Postal"] + ", " +
-    df_agences["ville"] + ", " +
-    df_agences["Adresse_Pays_A"]
+c1, c2, c3 = st.columns(3)
+
+with c1:
+    st.metric("Agences enregistrées", df_agences["code_agence"].nunique())
+
+with c2:
+    st.metric("Villes couvertes", df_agences["ville"].nunique())
+
+with c3:
+    top_city = df_agences["ville"].value_counts()
+    st.metric("Ville dominante", top_city.idxmax())
+
+st.divider()
+
+# ======================== MAP ========================
+
+st.subheader("🗺️ Répartition géographique")
+
+ville_map = st.selectbox(
+    "Filtrer la carte par ville",
+    ["Toutes"] + sorted(df_agences["ville"].unique())
 )
 
-# ======================== SECTION 1 : Metrics ========================
+df_map = df_agences if ville_map == "Toutes" else df_agences[df_agences["ville"] == ville_map]
+st.map(df_map[["latitude", "longitude"]])
 
-st.header("📊 Statistiques des agences")
+st.divider()
 
-col1, col2, col3 = st.columns(3)
+# ======================== TABLE ========================
 
-with col1:
-    st.metric("Nombre d'agences", df_agences["code_agence"].nunique())
+st.subheader("📋 Liste des agences")
 
-with col2:
-    st.metric("Nombre de villes", df_agences["ville"].nunique())
+st.dataframe(
+    df_agences[["code_agence", "adresse_complete", "telephone", "site_web"]],
+    use_container_width=True
+)
 
-with col3:
-    ville_top = df_agences["ville"].value_counts()
-    st.metric(
-        f"Ville la plus représentée ({ville_top.idxmax()})",
-        ville_top.max()
-    )
+# ======================== DETAILS ========================
 
-st.markdown("---")
+st.subheader("🔍 Détails par ville")
 
-# ======================== SECTION 2 : Map ========================
+ville_choice = st.selectbox(
+    "Sélectionnez une ville",
+    sorted(df_agences["ville"].unique())
+)
 
-st.header("🗺️ Localisation géographique")
+for _, ag in df_agences[df_agences["ville"] == ville_choice].iterrows():
+    with st.expander(f"🏢 Agence {ag['code_agence']}"):
+        st.markdown(f"""
+        **📍 Adresse** : {ag['adresse_complete']}  
+        **📞 Téléphone** : {ag['telephone']}  
+        **🌐 Site** : {ag['site_web']}
+        """)
 
-st.map(df_agences[["latitude", "longitude"]])
+st.divider()
 
-st.markdown("---")
+# ======================== DATA : CHAMBRES ========================
 
-# ======================== SECTION 3 : Table ========================
+st.subheader("🛏️ Chambres disponibles")
 
-st.header("📋 Liste des agences")
+sql_chambres = """
+SELECT
+    CodR AS code,
+    Floor AS etage,
+    SurfaceArea AS superficie,
+    Type AS type
+FROM ROOM
+LIMIT 5
+"""
 
-table_agences = df_agences[[
-    "code_agence",
-    "adresse_complete",
-    "telephone",
-    "site_web"
-]].copy()
+df_chambres = run_query(sql_chambres)
 
-table_agences.columns = [
-    "Code agence",
-    "Adresse complète",
-    "Téléphone",
-    "Site web"
-]
+images = {
+    "Simple": "assets/simple.jpg",
+    "Double": "assets/double.jpg",
+    "Triple": "assets/triple.jpg",
+    "Suite": "assets/suite.jpg"
+}
 
-st.dataframe(table_agences, use_container_width=True)
+for index, row in df_chambres.iterrows():
+    col_info, col_img = st.columns([2, 1])
 
-st.markdown("---")
+    with col_info:
+        st.markdown(f"""
+        ### 🛎️ Chambre {row['code']}
+        - **Étage** : {row['etage']}
+        - **Superficie** : {row['superficie']} m²
+        - **Type** : {row['type']}
+        """)
+        st.button("Réserver", key=f"res_{index}")
 
-# ======================== SECTION 4 : Filter by city ========================
+    with col_img:
+        st.image(
+            images.get(row["type"], images["Simple"]),
+            use_container_width=True
+        )
 
-st.header("🔍 Filtrer par ville")
+    st.divider()
 
-villes = ["Toutes"] + sorted(df_agences["ville"].unique())
-ville_selectionnee = st.selectbox("Choisissez une ville :", villes)
+# ======================== FOOTER ========================
 
-if ville_selectionnee != "Toutes":
-    df_filtre = df_agences[df_agences["ville"] == ville_selectionnee]
-
-    st.write(f"**{len(df_filtre)} agence(s) trouvée(s)**")
-
-    for _, agence in df_filtre.iterrows():
-        with st.expander(f"🏢 {agence['code_agence']}"):
-            st.write(f"📍 **Adresse :** {agence['adresse_complete']}")
-            st.write(f"📞 **Téléphone :** {agence['telephone']}")
-            st.write(f"🌐 **Site web :** {agence['site_web']}")
-
-# ======================== Footer ========================
-
-st.markdown("---")
 st.markdown("""
-<div style="text-align:center; color:#1B3C53;">
-    <p>Application de gestion hôtelière – Module Agences</p>
+<div style="text-align:center; opacity:0.7; margin-top:40px">
+    Application de gestion hôtelière • Streamlit Professional UI
 </div>
 """, unsafe_allow_html=True)

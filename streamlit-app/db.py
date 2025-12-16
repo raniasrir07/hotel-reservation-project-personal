@@ -4,10 +4,10 @@ from mysql.connector import Error
 
 DB_HOST = "127.0.0.1"
 
-DB_PORT = 3307           # IMPORTANT: docker expose 3307 -> 3306
-DB_USER = "adam"
+DB_PORT = 3307          
+DB_USER = "group9"
 DB_PASSWORD = "1234"
-DB_NAME = "hotel_db"
+DB_NAME = "hotel"
 
 def get_connection():
     try:
