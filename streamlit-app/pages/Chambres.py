@@ -17,7 +17,7 @@ st.title("🛏️ Gestion & Consultation des Chambres")
 st.caption("Recherche intelligente, affichage premium et analyse visuelle")
 st.divider()
 
-# ================= DB HELPER =================
+# ================= DB HELPER (MOVED UP) =================
 def run_query(query, params=None):
     conn = get_db_connection()
     cur = conn.cursor(dictionary=True)
@@ -26,6 +26,34 @@ def run_query(query, params=None):
     cur.close()
     conn.close()
     return data
+
+# ================= SQL (MOVED UP) =================
+query = """
+SELECT
+    r.CodR,
+    r.Floor,
+    r.SurfaceArea,
+    r.Type,
+    GROUP_CONCAT(DISTINCT ha.AMENITIES_Amenity) AS amenities,
+    GROUP_CONCAT(DISTINCT hs.SPACES_Space) AS spaces
+FROM ROOM r
+LEFT JOIN HAS_AMENITIES ha ON r.CodR = ha.ROOM_CodR
+LEFT JOIN HAS_SPACES hs ON r.CodR = hs.ROOM_CodR
+GROUP BY r.CodR, r.Floor, r.SurfaceArea, r.Type
+"""
+df = pd.DataFrame(run_query(query))
+
+# ================= STATISTIQUES (MOVED) =================
+st.subheader("📊 Statistiques clés")
+c1, c2, c3, c4 = st.columns(4)
+with c1:
+    st.metric("Chambres trouvées", len(df))
+with c2:
+    st.metric("Surface moyenne", f"{df['SurfaceArea'].mean():.1f} m²")
+with c3:
+    st.metric("Suites", len(df[df["Type"] == "suite"]))
+with c4:
+    st.metric("Étage max", df["Floor"].max())
 
 # ================= SIDEBAR FILTERS =================
 st.sidebar.title("🎯 Filtres")
@@ -49,23 +77,6 @@ kitchen_only = st.sidebar.checkbox("🍳 Avec cuisine")
 
 st.sidebar.divider()
 st.sidebar.caption("Les résultats se mettent à jour automatiquement")
-
-# ================= SQL =================
-query = """
-SELECT
-    r.CodR,
-    r.Floor,
-    r.SurfaceArea,
-    r.Type,
-    GROUP_CONCAT(DISTINCT ha.AMENITIES_Amenity) AS amenities,
-    GROUP_CONCAT(DISTINCT hs.SPACES_Space) AS spaces
-FROM ROOM r
-LEFT JOIN HAS_AMENITIES ha ON r.CodR = ha.ROOM_CodR
-LEFT JOIN HAS_SPACES hs ON r.CodR = hs.ROOM_CodR
-GROUP BY r.CodR, r.Floor, r.SurfaceArea, r.Type
-"""
-
-df = pd.DataFrame(run_query(query))
 
 # ================= APPLY FILTERS =================
 if type_filter != "toutes":
@@ -114,23 +125,6 @@ for _, row in df.head(5).iterrows():
         st.image(images.get(row["Type"]), use_container_width=True)
 
     st.divider()
-
-# ================= STATISTIQUES =================
-st.subheader("📊 Statistiques clés")
-
-c1, c2, c3, c4 = st.columns(4)
-
-with c1:
-    st.metric("Chambres trouvées", len(df))
-
-with c2:
-    st.metric("Surface moyenne", f"{df['SurfaceArea'].mean():.1f} m²")
-
-with c3:
-    st.metric("Suites", len(df[df["Type"] == "suite"]))
-
-with c4:
-    st.metric("Étage max", df["Floor"].max())
 
 # ================= VISUALISATIONS =================
 st.divider()
