@@ -1,7 +1,8 @@
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
-from utils import get_db_connection
+from db import run_query
+
 
 # ================= PAGE CONFIG =================
 st.set_page_config(
@@ -17,15 +18,6 @@ st.title("🛏️ Gestion & Consultation des Chambres")
 st.caption("Recherche intelligente, affichage premium et analyse visuelle")
 st.divider()
 
-# ================= DB HELPER (MOVED UP) =================
-def run_query(query, params=None):
-    conn = get_db_connection()
-    cur = conn.cursor(dictionary=True)
-    cur.execute(query, params or ())
-    data = cur.fetchall()
-    cur.close()
-    conn.close()
-    return data
 
 # ================= SIDEBAR FILTERS =================
 st.sidebar.title("🎯 Filtres")
@@ -38,7 +30,12 @@ type_filter = st.sidebar.radio(
 amenities = run_query(
     "SELECT DISTINCT AMENITIES_Amenity FROM HAS_AMENITIES ORDER BY AMENITIES_Amenity"
 )
-amenities_list = [a["AMENITIES_Amenity"] for a in amenities]
+
+amenities_list = (
+    amenities["AMENITIES_Amenity"].dropna().astype(str).tolist()
+    if not amenities.empty else []
+)
+
 
 selected_amenities = st.sidebar.multiselect(
     "Options disponibles",
@@ -82,7 +79,7 @@ LEFT JOIN HAS_SPACES hs ON r.CodR = hs.ROOM_CodR
 {where_sql}
 GROUP BY r.CodR, r.Floor, r.SurfaceArea, r.Type
 """
-df = pd.DataFrame(run_query(query, params))
+df = run_query(query, params)
 
 # ================= STATISTIQUES (MOVED) =================
 st.subheader("📊 Statistiques clés")

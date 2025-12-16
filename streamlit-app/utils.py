@@ -2,10 +2,9 @@ import os
 import json
 import logging
 from datetime import datetime
-from db import get_connection
 
-def get_db_connection():
-    return get_connection()
+
+
 
 def load_config(config_file):
     with open(config_file, 'r') as f:

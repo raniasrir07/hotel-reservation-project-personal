@@ -2,7 +2,8 @@ import streamlit as st
 import pandas as pd
 import calendar
 import altair as alt
-from utils import get_db_connection
+from db import run_query
+
 
 # ================= PAGE CONFIG =================
 st.set_page_config(
@@ -18,12 +19,6 @@ st.title("📊 Gestion & Analyse des Réservations")
 st.caption("Suivi des performances, tendances tarifaires et réservations premium")
 st.divider()
 
-# ================= DB HELPERS =================
-def run_query(query, params=None):
-    conn = get_db_connection()
-    df = pd.read_sql(query, conn, params=params)
-    conn.close()
-    return df
 
 # ================= SIDEBAR =================
 st.sidebar.title("🎛️ Filtres")
