@@ -120,16 +120,31 @@ tab1, tab2, tab3 = st.tabs(
     ["📆 Évolution mensuelle", "💎 Chambres premium", "🏢 Performance par agence"]
 )
 
+# Prepare WHERE clause for analytics tabs
+analytics_where = "WHERE 1=1"
+analytics_params = []
+if agence_filtre != "Toutes":
+    analytics_where += " AND B.TRAVEL_AGENCY_CodA = %s"
+    analytics_params.append(agence_filtre)
+if date_debut:
+    analytics_where += " AND B.StartDate >= %s"
+    analytics_params.append(date_debut)
+if date_fin:
+    analytics_where += " AND B.EndDate <= %s"
+    analytics_params.append(date_fin)
+
 # ---------- TAB 1 ----------
 with tab1:
-    monthly = run_query("""
+    monthly_query = f"""
         SELECT
-            DATE_FORMAT(StartDate, '%Y-%m') AS YM,
-            AVG(Cost / DATEDIFF(EndDate, StartDate)) AS Cout_Journalier_Moyen
-        FROM BOOKING
+            DATE_FORMAT(B.StartDate, '%Y-%m') AS YM,
+            AVG(B.Cost / DATEDIFF(B.EndDate, B.StartDate)) AS Cout_Journalier_Moyen
+        FROM BOOKING B
+        {analytics_where}
         GROUP BY YM
         ORDER BY YM
-    """)
+    """
+    monthly = run_query(monthly_query, analytics_params)
 
     monthly["Mois"] = monthly["YM"].apply(
         lambda x: calendar.month_name[int(x.split("-")[1])].capitalize()
@@ -148,7 +163,7 @@ with tab1:
 
 # ---------- TAB 2 ----------
 with tab2:
-    premium = run_query("""
+    premium_query = f"""
         SELECT
             DATE_FORMAT(B.StartDate, '%Y-%m') AS Mois,
             B.ROOM_CodR,
@@ -158,9 +173,11 @@ with tab2:
             AVG(B.Cost / DATEDIFF(B.EndDate, B.StartDate)) AS Cout_Moyen
         FROM BOOKING B
         JOIN ROOM R ON B.ROOM_CodR = R.CodR
+        {analytics_where}
         GROUP BY Mois, B.ROOM_CodR
         ORDER BY Cout_Moyen DESC
-    """)
+    """
+    premium = run_query(premium_query, analytics_params)
 
     premium["Cout_Moyen"] = premium["Cout_Moyen"].map(lambda x: f"{x:.0f} DH")
 
@@ -179,16 +196,18 @@ with tab2:
 
 # ---------- TAB 3 ----------
 with tab3:
-    agency_perf = run_query("""
+    agency_perf_query = f"""
         SELECT
             T.CodA AS Agence,
             COUNT(*) AS Nb_Reservations,
             SUM(B.Cost) AS CA
         FROM BOOKING B
         JOIN TRAVEL_AGENCY T ON B.TRAVEL_AGENCY_CodA = T.CodA
+        {analytics_where}
         GROUP BY T.CodA
         ORDER BY CA DESC
-    """)
+    """
+    agency_perf = run_query(agency_perf_query, analytics_params)
 
     agency_perf["CA"] = agency_perf["CA"].map(lambda x: f"{x:.0f} DH")
 

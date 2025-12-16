@@ -23,6 +23,18 @@ st.divider()
 
 # ======================== DATA : AGENCES ========================
 
+# Get list of cities for selectboxes
+sql_villes = """
+SELECT DISTINCT c.Name AS ville
+FROM CITY c
+JOIN TRAVEL_AGENCY a ON a.City_Address = c.Name
+ORDER BY c.Name
+"""
+df_villes = run_query(sql_villes)
+villes_list = df_villes["ville"].tolist()
+
+# ======================== METRICS ========================
+
 sql_agences = """
 SELECT
     a.CodA AS code_agence,
@@ -35,10 +47,7 @@ SELECT
 FROM TRAVEL_AGENCY a
 JOIN CITY c ON a.City_Address = c.Name
 """
-
 df_agences = run_query(sql_agences)
-
-# ======================== METRICS ========================
 
 st.subheader("📊 Indicateurs clés")
 
@@ -62,10 +71,39 @@ st.subheader("🗺️ Répartition géographique")
 
 ville_map = st.selectbox(
     "Filtrer la carte par ville",
-    ["Toutes"] + sorted(df_agences["ville"].unique())
+    ["Toutes"] + villes_list
 )
 
-df_map = df_agences if ville_map == "Toutes" else df_agences[df_agences["ville"] == ville_map]
+if ville_map == "Toutes":
+    sql_agences_map = """
+    SELECT
+        a.CodA AS code_agence,
+        a.Tel AS telephone,
+        a.WebSite AS site_web,
+        CONCAT(a.Street_Address, ' ', a.Num_Address, ', ', c.Name) AS adresse_complete,
+        c.Name AS ville,
+        c.Latitude AS latitude,
+        c.Longitude AS longitude
+    FROM TRAVEL_AGENCY a
+    JOIN CITY c ON a.City_Address = c.Name
+    """
+    df_map = run_query(sql_agences_map)
+else:
+    sql_agences_map = f"""
+    SELECT
+        a.CodA AS code_agence,
+        a.Tel AS telephone,
+        a.WebSite AS site_web,
+        CONCAT(a.Street_Address, ' ', a.Num_Address, ', ', c.Name) AS adresse_complete,
+        c.Name AS ville,
+        c.Latitude AS latitude,
+        c.Longitude AS longitude
+    FROM TRAVEL_AGENCY a
+    JOIN CITY c ON a.City_Address = c.Name
+    WHERE c.Name = '{ville_map}'
+    """
+    df_map = run_query(sql_agences_map)
+
 st.map(df_map[["latitude", "longitude"]])
 
 st.divider()
@@ -73,6 +111,19 @@ st.divider()
 # ======================== TABLE ========================
 
 st.subheader("📋 Liste des agences")
+
+# Always show all agencies in the table
+sql_agences_table = """
+SELECT
+    a.CodA AS code_agence,
+    a.Tel AS telephone,
+    a.WebSite AS site_web,
+    CONCAT(a.Street_Address, ' ', a.Num_Address, ', ', c.Name) AS adresse_complete,
+    c.Name AS ville
+FROM TRAVEL_AGENCY a
+JOIN CITY c ON a.City_Address = c.Name
+"""
+df_agences = run_query(sql_agences_table)
 
 st.dataframe(
     df_agences[["code_agence", "adresse_complete", "telephone", "site_web"]],
@@ -85,10 +136,22 @@ st.subheader("🔍 Détails par ville")
 
 ville_choice = st.selectbox(
     "Sélectionnez une ville",
-    sorted(df_agences["ville"].unique())
+    villes_list
 )
 
-for _, ag in df_agences[df_agences["ville"] == ville_choice].iterrows():
+sql_agences_details = f"""
+SELECT
+    a.CodA AS code_agence,
+    a.Tel AS telephone,
+    a.WebSite AS site_web,
+    CONCAT(a.Street_Address, ' ', a.Num_Address, ', ', c.Name) AS adresse_complete
+FROM TRAVEL_AGENCY a
+JOIN CITY c ON a.City_Address = c.Name
+WHERE c.Name = '{ville_choice}'
+"""
+df_details = run_query(sql_agences_details)
+
+for _, ag in df_details.iterrows():
     with st.expander(f"🏢 Agence {ag['code_agence']}"):
         st.markdown(f"""
         **📍 Adresse** : {ag['adresse_complete']}  

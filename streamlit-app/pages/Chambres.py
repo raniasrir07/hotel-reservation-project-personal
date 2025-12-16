@@ -27,34 +27,6 @@ def run_query(query, params=None):
     conn.close()
     return data
 
-# ================= SQL (MOVED UP) =================
-query = """
-SELECT
-    r.CodR,
-    r.Floor,
-    r.SurfaceArea,
-    r.Type,
-    GROUP_CONCAT(DISTINCT ha.AMENITIES_Amenity) AS amenities,
-    GROUP_CONCAT(DISTINCT hs.SPACES_Space) AS spaces
-FROM ROOM r
-LEFT JOIN HAS_AMENITIES ha ON r.CodR = ha.ROOM_CodR
-LEFT JOIN HAS_SPACES hs ON r.CodR = hs.ROOM_CodR
-GROUP BY r.CodR, r.Floor, r.SurfaceArea, r.Type
-"""
-df = pd.DataFrame(run_query(query))
-
-# ================= STATISTIQUES (MOVED) =================
-st.subheader("📊 Statistiques clés")
-c1, c2, c3, c4 = st.columns(4)
-with c1:
-    st.metric("Chambres trouvées", len(df))
-with c2:
-    st.metric("Surface moyenne", f"{df['SurfaceArea'].mean():.1f} m²")
-with c3:
-    st.metric("Suites", len(df[df["Type"] == "suite"]))
-with c4:
-    st.metric("Étage max", df["Floor"].max())
-
 # ================= SIDEBAR FILTERS =================
 st.sidebar.title("🎯 Filtres")
 
@@ -78,17 +50,51 @@ kitchen_only = st.sidebar.checkbox("🍳 Avec cuisine")
 st.sidebar.divider()
 st.sidebar.caption("Les résultats se mettent à jour automatiquement")
 
-# ================= APPLY FILTERS =================
+# ================= SQL QUERY WITH FILTERS =================
+where_clauses = []
+params = []
+
 if type_filter != "toutes":
-    df = df[df["Type"] == type_filter]
+    where_clauses.append("r.Type = %s")
+    params.append(type_filter)
 
 if selected_amenities:
-    df = df[df["amenities"].fillna("").apply(
-        lambda x: all(a in x for a in selected_amenities)
-    )]
+    for amenity in selected_amenities:
+        where_clauses.append("EXISTS (SELECT 1 FROM HAS_AMENITIES ha2 WHERE ha2.ROOM_CodR = r.CodR AND ha2.AMENITIES_Amenity = %s)")
+        params.append(amenity)
 
 if kitchen_only:
-    df = df[df["spaces"].fillna("").str.contains("kitchen")]
+    where_clauses.append("EXISTS (SELECT 1 FROM HAS_SPACES hs2 WHERE hs2.ROOM_CodR = r.CodR AND hs2.SPACES_Space = 'kitchen')")
+
+where_sql = ("WHERE " + " AND ".join(where_clauses)) if where_clauses else ""
+
+query = f"""
+SELECT
+    r.CodR,
+    r.Floor,
+    r.SurfaceArea,
+    r.Type,
+    GROUP_CONCAT(DISTINCT ha.AMENITIES_Amenity) AS amenities,
+    GROUP_CONCAT(DISTINCT hs.SPACES_Space) AS spaces
+FROM ROOM r
+LEFT JOIN HAS_AMENITIES ha ON r.CodR = ha.ROOM_CodR
+LEFT JOIN HAS_SPACES hs ON r.CodR = hs.ROOM_CodR
+{where_sql}
+GROUP BY r.CodR, r.Floor, r.SurfaceArea, r.Type
+"""
+df = pd.DataFrame(run_query(query, params))
+
+# ================= STATISTIQUES (MOVED) =================
+st.subheader("📊 Statistiques clés")
+c1, c2, c3, c4 = st.columns(4)
+with c1:
+    st.metric("Chambres trouvées", len(df))
+with c2:
+    st.metric("Surface moyenne", f"{df['SurfaceArea'].mean():.1f} m²")
+with c3:
+    st.metric("Suites", len(df[df["Type"] == "suite"]))
+with c4:
+    st.metric("Étage max", df["Floor"].max())
 
 # ================= TABLE =================
 st.subheader("📋 Chambres disponibles")
