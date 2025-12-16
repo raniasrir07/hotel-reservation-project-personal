@@ -1,13 +1,13 @@
+import os
 import pandas as pd
 import mysql.connector
 from mysql.connector import Error
 
-DB_HOST = "127.0.0.1"
-
-DB_PORT = 3307          
-DB_USER = "group9"
-DB_PASSWORD = "1234"
-DB_NAME = "hotel"
+DB_HOST = os.environ.get("DB_HOST", "127.0.0.1")
+DB_PORT = int(os.environ.get("DB_PORT", 3307))
+DB_USER = os.environ.get("DB_USER", "group9")
+DB_PASSWORD = os.environ.get("DB_PASSWORD", "1234")
+DB_NAME = os.environ.get("DB_NAME", "hotel")
 
 def get_connection():
     try:
