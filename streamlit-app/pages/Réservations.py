@@ -87,10 +87,12 @@ with c2:
     st.metric("Chiffre d'affaires", f"{df['Cost'].sum():,.0f} DH")
 
 with c3:
-    st.metric("Durée moyenne", f"{df['Duree'].mean():.1f} jours")
+    avg_duree = df['Duree'].mean()
+    st.metric("Durée moyenne", f"{0 if pd.isna(avg_duree) else avg_duree:.1f} jours")
 
 with c4:
-    st.metric("Coût moyen / jour", f"{df['Cout_Journalier'].mean():.0f} DH")
+    avg_cout_journalier = df['Cout_Journalier'].mean()
+    st.metric("Coût moyen / jour", f"{0 if pd.isna(avg_cout_journalier) else avg_cout_journalier:.0f} DH")
 
 # ================= TABLE =================
 st.divider()
