@@ -81,6 +81,10 @@ GROUP BY r.CodR, r.Floor, r.SurfaceArea, r.Type
 """
 df = run_query(query, params)
 
+if df.empty:
+    st.warning("Aucune chambre ne correspond à vos filtres.")
+    st.stop()
+
 # ================= STATISTIQUES (MOVED) =================
 st.subheader("📊 Statistiques clés")
 c1, c2, c3, c4 = st.columns(4)
