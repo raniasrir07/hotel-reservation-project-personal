@@ -1,5 +1,5 @@
 import streamlit as st
-from db import run_query # Assurez-vous que cette fonction est bien définie
+from db import run_query 
 from datetime import datetime
 
 # --- Configuration de la Page ---
