@@ -1,3 +1,10 @@
+
+import streamlit as st
+import pandas as pd
+import calendar
+import altair as alt
+from utils import get_db_connection
+
 # ======================== SQL QUERIES ========================
 # Query for SIDEBAR (agencies list)
 sql_agences = """
@@ -67,11 +74,6 @@ def sql_agency_perf(analytics_where):
         ORDER BY CA DESC
     """
 
-import streamlit as st
-import pandas as pd
-import calendar
-import altair as alt
-from utils import get_db_connection
 
 # ================= PAGE CONFIG =================
 st.set_page_config(
