@@ -21,8 +21,8 @@ services:
       - "8081:80"
     environment:
       PMA_HOST: mysql
-      PMA_USER: root
-      PMA_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      PMA_USER: group9
+      PMA_PASSWORD: 1234
     depends_on:
       - mysql
 
