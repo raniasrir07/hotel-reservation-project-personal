@@ -11,30 +11,66 @@ st.set_page_config(
     layout="wide"
 )
 
+# Hide default Streamlit sidebar and nav
+with open(os.path.join(os.path.dirname(__file__), '..', 'styles', 'main.css')) as f:
+    st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+
+# Import custom CSS for Agences page
+with open(os.path.join(os.path.dirname(__file__), '..', 'styles', 'agences.css')) as f:
+    st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+
+# Custom sidebar (copied from app.py)
+with st.sidebar:
+    st.markdown("""
+    <div class="sidebar-header">
+        <div class="hotel-logo">🏨</div>
+        <div class="hotel-name">Grand Hotel Chain</div>
+        <div class="hotel-role">Hotel Management System</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    st.markdown("---")
+
+    st.markdown("### 🧭 Navigation")
+    if st.button("📊 Dashboard", use_container_width=True):
+        st.switch_page("app.py")
+
+    if st.button("📅 Réservations", use_container_width=True):
+        st.switch_page("pages/Réservations.py")
+
+    if st.button("🛏️ Chambres", use_container_width=True):
+        st.switch_page("pages/Chambres.py")
+
+    if st.button("🤝 Agences", use_container_width=True):
+        st.switch_page("pages/Agences.py")
+
+    st.markdown("---")
+
+    st.markdown("### ⚙️ Système")
+    st.success("🟢 PMS en ligne")
+    from datetime import datetime
+    st.caption(f"Dernière synchronisation : {datetime.now().strftime('%H:%M:%S')}")
+
+    st.markdown("""
+    <div class="sidebar-footer">
+        Groupe 9 • PMS Hôtelier
+    </div>
+    """, unsafe_allow_html=True)
+
 theme_path = os.path.join(os.path.dirname(__file__), '..', 'theme.css')
 with open(theme_path) as f:
     st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
-# ======================== Header ========================
-
-st.title("🏨 Tableau de bord – Gestion Hôtelière")
-st.caption("Vue globale des agences & chambres disponibles")
-st.divider()
-
-# ======================== DATA : AGENCES ========================
-
-# Get list of cities for selectboxes
+# ======================== SQL QUERIES ========================
+# Query for DATA : AGENCES section (distinct cities with agencies)
 sql_villes = """
 SELECT DISTINCT c.Name AS ville
 FROM CITY c
 JOIN TRAVEL_AGENCY a ON a.City_Address = c.Name
 ORDER BY c.Name
 """
-df_villes = run_query(sql_villes)
-villes_list = df_villes["ville"].tolist()
 
-# ======================== METRICS ========================
-
+# Query for METRICS section (agency details with city info)
 sql_agences = """
 SELECT
     a.CodA AS code_agence,
@@ -47,6 +83,97 @@ SELECT
 FROM TRAVEL_AGENCY a
 JOIN CITY c ON a.City_Address = c.Name
 """
+
+# Query for MAP section (agency details for map, all cities)
+sql_agences_map_all = """
+SELECT
+    a.CodA AS code_agence,
+    a.Tel AS telephone,
+    a.WebSite AS site_web,
+    CONCAT(a.Street_Address, ' ', a.Num_Address, ', ', c.Name) AS adresse_complete,
+    c.Name AS ville,
+    c.Latitude AS latitude,
+    c.Longitude AS longitude
+FROM TRAVEL_AGENCY a
+JOIN CITY c ON a.City_Address = c.Name
+"""
+
+# Query for MAP section (agency details for map, filtered by city)
+sql_agences_map_city = lambda ville_map: f"""
+SELECT
+    a.CodA AS code_agence,
+    a.Tel AS telephone,
+    a.WebSite AS site_web,
+    CONCAT(a.Street_Address, ' ', a.Num_Address, ', ', c.Name) AS adresse_complete,
+    c.Name AS ville,
+    c.Latitude AS latitude,
+    c.Longitude AS longitude
+FROM TRAVEL_AGENCY a
+JOIN CITY c ON a.City_Address = c.Name
+WHERE c.Name = '{ville_map}'
+"""
+
+# Query for TABLE section (agency list for table)
+sql_agences_table = """
+SELECT
+    a.CodA AS code_agence,
+    a.Tel AS telephone,
+    a.WebSite AS site_web,
+    CONCAT(a.Street_Address, ' ', a.Num_Address, ', ', c.Name) AS adresse_complete,
+    c.Name AS ville
+FROM TRAVEL_AGENCY a
+JOIN CITY c ON a.City_Address = c.Name
+"""
+
+# Query for DETAILS section (agency details for selected city)
+sql_agences_details = lambda ville_choice: f"""
+SELECT
+    a.CodA AS code_agence,
+    a.Tel AS telephone,
+    a.WebSite AS site_web,
+    CONCAT(a.Street_Address, ' ', a.Num_Address, ', ', c.Name) AS adresse_complete
+FROM TRAVEL_AGENCY a
+JOIN CITY c ON a.City_Address = c.Name
+WHERE c.Name = '{ville_choice}'
+"""
+
+# Query for DATA : CHAMBRES section (available rooms, limit 5)
+sql_chambres = """
+SELECT
+    CodR AS code,
+    Floor AS etage,
+    SurfaceArea AS superficie,
+    Type AS type
+FROM ROOM
+LIMIT 5
+"""
+
+# Query for AGENCY PERFORMANCE section (top 5 agencies by performance)
+sql_agency_perf = """
+SELECT
+    a.CodA AS agence,
+    COUNT(b.ROOM_CodR) AS total_reservations,
+    SUM(b.Cost) AS chiffre_affaires
+FROM TRAVEL_AGENCY a
+LEFT JOIN BOOKING b ON a.CodA = b.TRAVEL_AGENCY_CodA
+GROUP BY a.CodA
+ORDER BY chiffre_affaires DESC
+LIMIT 5
+"""
+
+# ======================== Header ========================
+
+st.title("🏨 Tableau de bord – Gestion Hôtelière")
+st.caption("Vue globale des agences & chambres disponibles")
+st.divider()
+
+# ======================== DATA : AGENCES ========================
+
+df_villes = run_query(sql_villes)
+villes_list = df_villes["ville"].tolist()
+
+# ======================== METRICS ========================
+
 df_agences = run_query(sql_agences)
 
 st.subheader("📊 Indicateurs clés")
@@ -75,34 +202,9 @@ ville_map = st.selectbox(
 )
 
 if ville_map == "Toutes":
-    sql_agences_map = """
-    SELECT
-        a.CodA AS code_agence,
-        a.Tel AS telephone,
-        a.WebSite AS site_web,
-        CONCAT(a.Street_Address, ' ', a.Num_Address, ', ', c.Name) AS adresse_complete,
-        c.Name AS ville,
-        c.Latitude AS latitude,
-        c.Longitude AS longitude
-    FROM TRAVEL_AGENCY a
-    JOIN CITY c ON a.City_Address = c.Name
-    """
-    df_map = run_query(sql_agences_map)
+    df_map = run_query(sql_agences_map_all)
 else:
-    sql_agences_map = f"""
-    SELECT
-        a.CodA AS code_agence,
-        a.Tel AS telephone,
-        a.WebSite AS site_web,
-        CONCAT(a.Street_Address, ' ', a.Num_Address, ', ', c.Name) AS adresse_complete,
-        c.Name AS ville,
-        c.Latitude AS latitude,
-        c.Longitude AS longitude
-    FROM TRAVEL_AGENCY a
-    JOIN CITY c ON a.City_Address = c.Name
-    WHERE c.Name = '{ville_map}'
-    """
-    df_map = run_query(sql_agences_map)
+    df_map = run_query(sql_agences_map_city(ville_map))
 
 st.map(df_map[["latitude", "longitude"]])
 
@@ -112,17 +214,6 @@ st.divider()
 
 st.subheader("📋 Liste des agences")
 
-# Always show all agencies in the table
-sql_agences_table = """
-SELECT
-    a.CodA AS code_agence,
-    a.Tel AS telephone,
-    a.WebSite AS site_web,
-    CONCAT(a.Street_Address, ' ', a.Num_Address, ', ', c.Name) AS adresse_complete,
-    c.Name AS ville
-FROM TRAVEL_AGENCY a
-JOIN CITY c ON a.City_Address = c.Name
-"""
 df_agences = run_query(sql_agences_table)
 
 st.dataframe(
@@ -139,17 +230,7 @@ ville_choice = st.selectbox(
     villes_list
 )
 
-sql_agences_details = f"""
-SELECT
-    a.CodA AS code_agence,
-    a.Tel AS telephone,
-    a.WebSite AS site_web,
-    CONCAT(a.Street_Address, ' ', a.Num_Address, ', ', c.Name) AS adresse_complete
-FROM TRAVEL_AGENCY a
-JOIN CITY c ON a.City_Address = c.Name
-WHERE c.Name = '{ville_choice}'
-"""
-df_details = run_query(sql_agences_details)
+df_details = run_query(sql_agences_details(ville_choice))
 
 for _, ag in df_details.iterrows():
     with st.expander(f"🏢 Agence {ag['code_agence']}"):
@@ -164,16 +245,6 @@ st.divider()
 # ======================== DATA : CHAMBRES ========================
 
 st.subheader("🛏️ Chambres disponibles")
-
-sql_chambres = """
-SELECT
-    CodR AS code,
-    Floor AS etage,
-    SurfaceArea AS superficie,
-    Type AS type
-FROM ROOM
-LIMIT 5
-"""
 
 df_chambres = run_query(sql_chambres)
 
@@ -194,7 +265,6 @@ for index, row in df_chambres.iterrows():
         - **Superficie** : {row['superficie']} m²
         - **Type** : {row['type']}
         """)
-        st.button("Réserver", key=f"res_{index}")
 
     with col_img:
         st.image(
@@ -203,6 +273,30 @@ for index, row in df_chambres.iterrows():
         )
 
     st.divider()
+
+# ======================== AGENCY PERFORMANCE ========================
+
+st.subheader("🏆 Performance des agences")
+
+df_perf = run_query(sql_agency_perf)
+
+c1, c2 = st.columns(2)
+
+with c1:
+    st.markdown("#### 📅 Réservations par agence")
+    st.dataframe(
+        df_perf[["agence", "total_reservations"]],
+        use_container_width=True
+    )
+
+with c2:
+    st.markdown("#### 💰 Chiffre d’affaires (MAD)")
+    st.dataframe(
+        df_perf[["agence", "chiffre_affaires"]],
+        use_container_width=True
+    )
+
+st.divider()
 
 # ======================== FOOTER ========================
 

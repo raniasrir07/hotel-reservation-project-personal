@@ -10,12 +10,77 @@ st.set_page_config(
     layout="wide"
 )
 
+# Hide default Streamlit sidebar and nav
+with open('styles/main.css') as f:
+    st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+
+# Custom sidebar (copied from app.py)
+with st.sidebar:
+    st.markdown("""
+    <div class="sidebar-header">
+        <div class="hotel-logo">🏨</div>
+        <div class="hotel-name">Grand Hotel Chain</div>
+        <div class="hotel-role">Hotel Management System</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    st.markdown("---")
+
+    st.markdown("### 🧭 Navigation")
+    if st.button("📊 Dashboard", use_container_width=True):
+        st.switch_page("app.py")
+
+    if st.button("📅 Réservations", use_container_width=True):
+        st.switch_page("pages/Réservations.py")
+
+    if st.button("🛏️ Chambres", use_container_width=True):
+        st.switch_page("pages/Chambres.py")
+
+    if st.button("🤝 Agences", use_container_width=True):
+        st.switch_page("pages/Agences.py")
+
+    st.markdown("---")
+
+    st.markdown("### ⚙️ Système")
+    st.success("🟢 PMS en ligne")
+    from datetime import datetime
+    st.caption(f"Dernière synchronisation : {datetime.now().strftime('%H:%M:%S')}")
+
+    st.markdown("""
+    <div class="sidebar-footer">
+        Groupe 9 • PMS Hôtelier
+    </div>
+    """, unsafe_allow_html=True)
+
 st.markdown('<style>' + open('theme.css').read() + '</style>', unsafe_allow_html=True)
 
 # ================= TITLE =================
 st.title("🛏️ Gestion & Consultation des Chambres")
 st.caption("Recherche intelligente, affichage premium et analyse visuelle")
 st.divider()
+
+# ======================== SQL QUERIES ========================
+# Query for SIDEBAR FILTERS section (distinct amenities)
+sql_amenities = """
+SELECT DISTINCT AMENITIES_Amenity FROM HAS_AMENITIES ORDER BY AMENITIES_Amenity
+"""
+
+# Query for MAIN TABLE section (rooms with filters)
+def sql_rooms(where_sql):
+    return f"""
+SELECT
+    r.CodR,
+    r.Floor,
+    r.SurfaceArea,
+    r.Type,
+    GROUP_CONCAT(DISTINCT ha.AMENITIES_Amenity) AS amenities,
+    GROUP_CONCAT(DISTINCT hs.SPACES_Space) AS spaces
+FROM ROOM r
+LEFT JOIN HAS_AMENITIES ha ON r.CodR = ha.ROOM_CodR
+LEFT JOIN HAS_SPACES hs ON r.CodR = hs.ROOM_CodR
+{where_sql}
+GROUP BY r.CodR, r.Floor, r.SurfaceArea, r.Type
+"""
 
 # ================= DB HELPER (MOVED UP) =================
 def run_query(query, params=None):
@@ -35,9 +100,7 @@ type_filter = st.sidebar.radio(
     ["toutes", "single", "double", "triple", "suite"]
 )
 
-amenities = run_query(
-    "SELECT DISTINCT AMENITIES_Amenity FROM HAS_AMENITIES ORDER BY AMENITIES_Amenity"
-)
+amenities = run_query(sql_amenities)
 amenities_list = [a["AMENITIES_Amenity"] for a in amenities]
 
 selected_amenities = st.sidebar.multiselect(
@@ -68,21 +131,7 @@ if kitchen_only:
 
 where_sql = ("WHERE " + " AND ".join(where_clauses)) if where_clauses else ""
 
-query = f"""
-SELECT
-    r.CodR,
-    r.Floor,
-    r.SurfaceArea,
-    r.Type,
-    GROUP_CONCAT(DISTINCT ha.AMENITIES_Amenity) AS amenities,
-    GROUP_CONCAT(DISTINCT hs.SPACES_Space) AS spaces
-FROM ROOM r
-LEFT JOIN HAS_AMENITIES ha ON r.CodR = ha.ROOM_CodR
-LEFT JOIN HAS_SPACES hs ON r.CodR = hs.ROOM_CodR
-{where_sql}
-GROUP BY r.CodR, r.Floor, r.SurfaceArea, r.Type
-"""
-df = pd.DataFrame(run_query(query, params))
+df = pd.DataFrame(run_query(sql_rooms(where_sql), params))
 
 if df.empty:
     st.warning("Aucune chambre ne correspond à vos filtres.")
