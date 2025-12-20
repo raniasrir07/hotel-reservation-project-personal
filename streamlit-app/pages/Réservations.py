@@ -83,7 +83,7 @@ st.set_page_config(
     layout="wide"
 )
 
-# Hide default Streamlit sidebar and nav
+# Hide defaulssst Streamlit sidebar and nav
 with open('styles/main.css') as f:
     st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
