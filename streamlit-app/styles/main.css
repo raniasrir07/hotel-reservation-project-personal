@@ -1,144 +1,219 @@
-/* --- GLOBAL BACKGROUND IMAGE WITH OVERLAY FOR HOTEL THEME --- */
+/* ======================================================
+   GLOBAL BACKGROUND
+====================================================== */
 body {
     background: linear-gradient(rgba(20, 30, 40, 0.65), rgba(20, 30, 40, 0.65)),
         url('../hotelbg.jpg');
     background-size: cover;
     background-attachment: fixed;
     background-position: center;
-    min-height: 100vh;
 }
 
-/* Add shadow to main content area for contrast */
+/* Main container */
 main, .block-container {
-    background: var(--color-white, #FFFFFF);
+    background: linear-gradient(180deg, #0f2027, #203a43, #2c5364);
+    color: #fff;
     border-radius: 18px;
     box-shadow: 0 8px 32px rgba(0,0,0,0.18);
-    padding: 2rem 2.5rem;
+    padding: 2.5rem;
     margin-top: 2rem;
-    border-left: 5px solid var(--color-accent, #456882);
+    border-left: 5px solid #456882;
 }
 
-/* 1. SECTION IMAGE DE FOND (HEADER) */
+/* ======================================================
+   SIDEBAR (HOTEL PMS STYLE)
+====================================================== */
+section[data-testid="stSidebar"] {
+    background: linear-gradient(180deg, #0f2027, #203a43, #2c5364);
+    color: white;
+}
+
+.sidebar-header {
+    text-align: center;
+    padding: 1.2rem 0;
+}
+
+.hotel-logo {
+    font-size: 3rem;
+}
+
+.hotel-name {
+    font-size: 1.2rem;
+    font-weight: 700;
+}
+
+.hotel-role {
+    font-size: 0.85rem;
+    opacity: 0.8;
+}
+
+section[data-testid="stSidebar"] button {
+    border-radius: 10px;
+    font-weight: 600;
+}
+
+.sidebar-footer {
+    margin-top: 2rem;
+    font-size: 0.75rem;
+    opacity: 0.7;
+    text-align: center;
+}
+
+/* Hide Streamlit's default sidebar nav and hamburger menu */
+/* Hide the hamburger menu (top left) */
+#MainMenu {
+    visibility: hidden;
+}
+/* Hide the default sidebar nav list */
+section[data-testid="stSidebar"] ul,
+section[data-testid="stSidebar"] nav,
+section[data-testid="stSidebar"] [data-testid="stSidebarNav"] {
+    display: none !important;
+}
+/* Hide the collapse sidebar button */
+button[title="Collapse sidebar"] {
+    display: none !important;
+}
+
+/* ======================================================
+   HERO SECTION
+====================================================== */
 .hero-section-bg {
-    background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.6)), 
-        url('https://images.unsplash.com/photo-1445019980597-93fa8acb246c?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8aG90ZWx8ZW58MHx8MHx8fDA%3D');
+    background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.7)),
+    url('https://images.unsplash.com/photo-1445019980597-93fa8acb246c');
     background-size: cover;
     background-position: center;
-    background-attachment: fixed;
-    padding: 6rem 2rem 4rem 2rem;
+    padding: 6rem 2rem 4rem;
     margin: -6rem -4rem 3rem -4rem;
     text-align: center;
-    position: relative;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.3);
-    color: var(--color-white, #FFFFFF); 
-    border-radius: 0 0 15px 15px; 
+    color: white;
+    border-radius: 0 0 18px 18px;
 }
-.hero-header {
-    background: none;
-    padding: 0;
-    margin: 0;
-    box-shadow: none;
-    border-radius: 0;
-}
+
 .hero-title {
     font-size: 4.5rem;
-    font-weight: 200;
     letter-spacing: 0.15em;
-    color: var(--color-white, #FFFFFF); 
-    margin-bottom: 0.5rem;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); 
+    font-weight: 200;
 }
+
 .hero-subtitle {
-    font-size: 1.6rem;
-    color: #e0e7ff; 
-    font-weight: 300;
-    letter-spacing: 0.1em;
-    padding-bottom: 1rem;
-    border-bottom: none; 
+    font-size: 1.4rem;
+    opacity: 0.9;
 }
-.section-header {
-    text-align: center;
-    margin: 3rem 0 1.5rem 0;
-    font-weight: 300;
-    letter-spacing: 0.1em;
-    color: var(--color-primary, #1B3C53);
-    font-size: 2rem;
-    text-transform: uppercase;
-}
+
 .intro-text {
-    text-align: center;
-    padding: 2rem 0;
-    font-size: 1.15rem;
-    line-height: 1.8;
-    color: #e0e7ff;
     max-width: 800px;
     margin: auto;
-    font-weight: 400;
-    background: none;
-    margin-bottom: 0;
+    font-size: 1.1rem;
+    line-height: 1.8;
 }
-/* Section de Statistiques Rapides (Cards) */
-.stat-card {
-    cursor: pointer;
+
+/* ======================================================
+   SECTIONS
+====================================================== */
+.section-header {
     text-align: center;
-    padding: 2rem 1.5rem;
-    border-radius: 12px;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.18); 
-    color: var(--color-white, #FFFFFF);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    min-height: 180px; 
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
+    margin: 3rem 0 1.5rem;
+    font-size: 2rem;
+    letter-spacing: 0.12em;
+    color: #1B3C53;
+    font-weight: 300;
+    text-transform: uppercase;
+}
+
+/* ======================================================
+   STAT CARDS
+====================================================== */
+.stat-card {
+    text-align: center;
+    padding: 2rem;
+    border-radius: 14px;
+    color: white;
+    box-shadow: 0 10px 28px rgba(0,0,0,0.25);
+    transition: transform 0.3s ease;
 }
 
 .stat-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 16px 32px rgba(0,0,0,0.22);
+    transform: translateY(-6px);
 }
 
-.card-rooms { background: var(--color-card-rooms, linear-gradient(135deg, #1e3c72 0%, #2a5298 100%)); }
-.card-reservations { background: var(--color-card-reservations, linear-gradient(135deg, #a73737 0%, #7a2828 100%)); }
-.card-agencies { background: var(--color-card-agencies, linear-gradient(135deg, #38acb9 0%, #177a88 100%)); }
+.card-rooms {
+    background: linear-gradient(135deg, #1e3c72, #2a5298);
+}
 
-/* NOUVEAUX STYLES POUR LES CARTES D'ÉQUIPE */
-.team-card {
-    background-color: var(--color-white, #FFFFFF);
-    padding: 1.5rem;
-    border-radius: 10px;
-    box-shadow: 0 6px 18px rgba(0,0,0,0.10);
-    text-align: center;
-    margin-bottom: 1.5rem; /* Espace entre les lignes */
-    border: 1px solid #e0e7ff;
-    transition: box-shadow 0.3s ease;
+.card-reservations {
+    background: linear-gradient(135deg, #a73737, #7a2828);
 }
-.team-card:hover {
-    box-shadow: 0 12px 28px rgba(0,0,0,0.16);
+
+.card-agencies {
+    background: linear-gradient(135deg, #38acb9, #177a88);
 }
-.member-name {
-    font-size: 1.3rem;
-    font-weight: 600;
-    color: var(--color-primary, #1B3C53);
-    margin-bottom: 0.25rem;
+
+.card-icon {
+    font-size: 2.2rem;
 }
-.member-role {
-    font-size: 0.95rem;
-    color: #4a6fa5; /* Bleu clair */
-    font-weight: 400;
-}
-.group-number {
-    font-size: 1.1rem;
+
+.card-count {
+    font-size: 2.8rem;
     font-weight: 700;
-    color: #a73737; /* Couleur d'accentuation (Rouge bordeaux) */
-    margin-top: 1rem;
 }
 
-/* Optional: subtle shadow for footer */
+.card-label {
+    font-size: 1rem;
+    opacity: 0.9;
+}
+
+/* ======================================================
+   FOOTER
+====================================================== */
 .footer {
-    box-shadow: 0 -2px 12px rgba(0,0,0,0.10);
-    background: var(--color-white, #FFFFFF);
+    margin-top: 3rem;
+    padding: 1rem;
+    text-align: center;
+    background: linear-gradient(180deg, #0f2027, #203a43, #2c5364);
+    color: #fff;
     border-radius: 12px 12px 0 0;
+    box-shadow: 0 -2px 12px rgba(0,0,0,0.1);
+}
+/* ======================================================
+   TEAM SECTION
+====================================================== */
+.team-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1.5rem;
     margin-top: 2rem;
-    padding: 1rem 0;
+}
+
+.team-card {
+    background: linear-gradient(135deg, #1e3c72, #2a5298);
+    border-radius: 16px;
+    padding: 2rem 1.5rem;
+    text-align: center;
+    color: white;
+    box-shadow: 0 10px 28px rgba(0,0,0,0.25);
+    transition: transform 0.3s ease;
+    min-width: 220px;
+    max-width: 260px;
+}
+
+.team-card:hover {
+    transform: translateY(-6px);
+}
+
+.team-avatar {
+    font-size: 2.5rem;
+    margin-bottom: 0.8rem;
+}
+
+.team-name {
+    font-weight: 700;
+    font-size: 1.05rem;
+}
+
+.team-role {
+    font-size: 0.9rem;
+    opacity: 0.85;
+    margin-top: 0.3rem;
 }

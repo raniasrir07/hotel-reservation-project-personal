@@ -1,113 +1,186 @@
-/* Add theme color variables */
+/* ======================================================
+   GOOGLE FONT
+====================================================== */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap');
+
+/* ======================================================
+   THEME VARIABLES – LUXURY HOTEL PMS
+====================================================== */
 :root {
-    --color-bg: #E3E3E3;
-    --color-primary: #1B3C53;
-    --color-accent: #456882;
-    --color-sidebar: #234C6A;
+    --color-bg: #F2F4F7;
+    --color-primary: #1B3C53;          /* Deep Navy */
+    --color-accent: #456882;           /* Steel Blue */
+    --color-sidebar: #0F2A3A;          /* Darker Navy */
     --color-white: #FFFFFF;
-    --color-header: #456882;
-    --color-card-rooms: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-    --color-card-reservations: linear-gradient(135deg, #a73737 0%, #7a2828 100%);
-    --color-card-agencies: linear-gradient(135deg, #38acb9 0%, #177a88 100%);
+    --color-muted: #6B7C93;
+
+    /* KPI cards */
+    --color-card-rooms: linear-gradient(135deg, #1e3c72, #2a5298);
+    --color-card-reservations: linear-gradient(135deg, #a73737, #7a2828);
+    --color-card-agencies: linear-gradient(135deg, #38acb9, #177a88);
 }
 
+/* ======================================================
+   APP BASE
+====================================================== */
 .stApp {
-    background-color: #E3E3E3;
-    color: #1B3C53;
+    background-color: var(--color-bg);
+    color: var(--color-primary);
     font-family: 'Poppins', sans-serif;
 }
 
+/* ======================================================
+   SIDEBAR – HOTEL CONTROL PANEL
+====================================================== */
 section[data-testid="stSidebar"] {
-    background-color: #1B3C53;
-    color: #E3E3E3;
-    box-shadow: 4px 0 10px rgba(27, 60, 83, 0.4);
+    background: linear-gradient(180deg, #0f2027, #203a43, #2c5364);
+    color: #EAF0F6;
+    box-shadow: 4px 0 18px rgba(0, 0, 0, 0.35);
 }
+
 section[data-testid="stSidebar"] * {
-    color: #E3E3E3;
+    color: #EAF0F6;
     font-weight: 500;
 }
 
-[data-testid="stVerticalBlock"] > div:first-child > div:first-child {
-    background-color: #456882;
-    padding: 25px 30px;
-    margin-bottom: 25px;
-    border-radius: 0 0 15px 15px;
-    box-shadow: 0 3px 10px rgba(69, 104, 130, 0.3);
+/* Sidebar buttons */
+section[data-testid="stSidebar"] button {
+    border-radius: 12px;
+    font-weight: 600;
+    transition: all 0.25s ease;
 }
 
-h1, h2, h3 {
-    color: #1B3C53;
-    font-weight: 700;
+section[data-testid="stSidebar"] button:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+    transform: translateX(3px);
 }
+
+/* ======================================================
+   HEADER BLOCK (FIRST CONTAINER)
+====================================================== */
+[data-testid="stVerticalBlock"] > div:first-child > div:first-child {
+    background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+    padding: 28px 32px;
+    margin-bottom: 30px;
+    border-radius: 0 0 18px 18px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+}
+
+/* Header title inside */
 [data-testid="stVerticalBlock"] > div:first-child > div:first-child h1 {
     color: white;
-    font-size: 2.2em;
+    font-size: 2.4rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
 }
 
+/* ======================================================
+   MAIN CONTENT CONTAINER
+====================================================== */
 .block-container {
-    background-color: #E3E3E3;
-    border-radius: 12px;
-    padding: 2.5rem;
+    background-color: var(--color-white);
+    border-radius: 18px;
+    padding: 2.8rem;
     margin-top: 2rem;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-    border-left: 5px solid #456882;
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.18);
+    border-left: 6px solid var(--color-accent);
 }
 
-.st-emotion-cache-1y4v0h-anchor[aria-current="page"] {
-    background-color: #234C6A;
-    color: #E3E3E3 !important;
+/* ======================================================
+   TYPOGRAPHY
+====================================================== */
+h1, h2, h3 {
+    color: var(--color-primary);
     font-weight: 700;
-    border-radius: 6px;
 }
 
+h2 {
+    letter-spacing: 0.12em;
+    font-weight: 500;
+}
+
+p, label {
+    color: var(--color-muted);
+}
+
+/* ======================================================
+   FORMS
+====================================================== */
 input, select, textarea {
     background-color: #FFFFFF !important;
-    color: #1B3C53 !important;
-    border-radius: 6px !important;
-    border: 1px solid #456882 !important;
+    color: var(--color-primary) !important;
+    border-radius: 8px !important;
+    border: 1px solid var(--color-accent) !important;
 }
+
 input:focus, select:focus, textarea:focus {
-    border-color: #1B3C53 !important;
+    border-color: var(--color-primary) !important;
     box-shadow: 0 0 0 3px rgba(27, 60, 83, 0.3) !important;
 }
 
+/* ======================================================
+   BUTTONS – HOTEL PMS STYLE
+====================================================== */
 .stButton > button {
-    background-color: #1B3C53;
+    background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
     color: white;
     border-radius: 30px;
-    padding: 10px 25px;
+    padding: 12px 28px;
     font-weight: 700;
     border: none;
-    transition: background-color 0.3s ease, transform 0.3s;
-}
-.stButton > button:hover {
-    background-color: #456882;
-    transform: translateY(-2px);
+    transition: all 0.3s ease;
 }
 
+.stButton > button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.25);
+}
+
+/* ======================================================
+   DATAFRAMES / TABLES
+====================================================== */
 .stDataFrame {
     background-color: #FFFFFF;
-    border-radius: 8px;
-    padding: 15px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-}
-.stDataFrame > div > div > div:nth-child(1) > div:nth-child(2) > div:nth-child(1) {
-    color: #1B3C53 !important;
-    font-weight: 700;
-    border-bottom: 2px solid #456882;
+    border-radius: 12px;
+    padding: 18px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
 }
 
+.stDataFrame thead tr th {
+    color: var(--color-primary);
+    font-weight: 700;
+    border-bottom: 2px solid var(--color-accent);
+}
+
+/* ======================================================
+   TABS
+====================================================== */
 button[data-baseweb="tab"] {
-    background-color: #E3E3E3;
-    color: #1B3C53;
-    border-radius: 8px 8px 0 0;
+    background-color: #F2F4F7;
+    color: var(--color-primary);
+    border-radius: 10px 10px 0 0;
     font-weight: 600;
 }
+
 button[data-baseweb="tab"][aria-selected="true"] {
-    background-color: #234C6A;
-    color: #E3E3E3;
+    background-color: var(--color-primary);
+    color: white;
     font-weight: 700;
 }
 
-/* Add Google Fonts */
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap');
+/* ======================================================
+   ACTIVE PAGE INDICATOR (NAV)
+====================================================== */
+.st-emotion-cache-1y4v0h-anchor[aria-current="page"] {
+    background-color: rgba(255, 255, 255, 0.12);
+    font-weight: 700;
+    border-radius: 8px;
+}
+
+
+/* ======================================================
+   CLEAN STREAMLIT BRANDING
+====================================================== */
+#MainMenu { visibility: hidden; }
+footer { visibility: hidden; }
+
