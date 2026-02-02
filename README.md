@@ -30,14 +30,6 @@ fully containerized using **Docker**.
 ---
 
 
-
-##  Setup (Environment Variables)
-Create a `.env` file using the template below:
-
-```bash
-cp .env.example .env
-
----
 ##  Database & SQL
 The project uses a MySQL relational database with SQL scripts for schema creation and data initialization.
 
