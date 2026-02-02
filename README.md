@@ -46,11 +46,12 @@ Database initialization scripts are located in:
 mysql-docker/
 
 ---
----
+
 
 
 ```md
 ## 📁 Project Structure
+
 ```text
 hotel-reservation-project-personal/
 │
