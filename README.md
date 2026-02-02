@@ -44,7 +44,7 @@ Database initialization scripts are located in:
 
 ```text
 mysql-docker/
-
+---
 
 ---
 
