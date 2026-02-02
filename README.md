@@ -38,10 +38,15 @@ Implemented SQL operations include:
 - Relational modeling between hotels, rooms, reservations, and agencies
 - SQL queries for data insertion and retrieval
 
+
+```md
 Database initialization scripts are located in:
 
 ```text
 mysql-docker/
+
+
+---
 
 
 
