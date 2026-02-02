@@ -41,3 +41,29 @@ Implemented SQL operations include:
 Database initialization scripts are located in:
 ```text
 mysql-docker/
+
+---
+
+## 📁 Project Structure
+
+```text
+hotel-reservation-project-personal/
+│
+├── mysql-docker/                  # MySQL database container & initialization
+│   └── data/                      # SQL schema and sample data
+│
+├── streamlit-app/                 # Streamlit web application
+│   ├── assets/                    # Images and static assets
+│   ├── pages/                     # Application pages (navigation)
+│   ├── styles/                    # CSS styles
+│   ├── app.py                     # Main Streamlit entry point
+│   ├── db.py                      # Database connection logic
+│   ├── utils.py                   # Utility functions
+│   ├── Dockerfile                 # Streamlit container configuration
+│   ├── requirements.txt           # Python dependencies
+│   └── install_requirements.sh    # Dependency installation script
+│
+├── docker-compose.yml             # Docker services orchestration
+├── .gitignore                     # Git ignored files
+└── README.md                      # Project documentation
+
