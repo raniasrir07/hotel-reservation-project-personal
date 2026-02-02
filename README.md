@@ -39,7 +39,7 @@ Implemented SQL operations include:
 - SQL queries for data insertion and retrieval
 
 
-```md
+
 Database initialization scripts are located in:
 
 ```text
@@ -48,27 +48,3 @@ mysql-docker/
 ---
 
 
-
-```md
-## 📁 Project Structure
-
-```text
-hotel-reservation-project-personal/
-│
-├── mysql-docker/
-│   └── data/
-│
-├── streamlit-app/
-│   ├── assets/
-│   ├── pages/
-│   ├── styles/
-│   ├── app.py
-│   ├── db.py
-│   ├── utils.py
-│   ├── Dockerfile
-│   ├── requirements.txt
-│   └── install_requirements.sh
-│
-├── docker-compose.yml
-├── .gitignore
-└── README.md
