@@ -44,7 +44,6 @@ Database initialization scripts are located in:
 mysql-docker/
 
 ---
-
 ```md
 ---
 
@@ -70,3 +69,8 @@ hotel-reservation-project-personal/
 ├── docker-compose.yml             # Docker services orchestration
 ├── .gitignore                     # Git ignored files
 └── README.md                      # Project documentation
+
+
+
+
+
