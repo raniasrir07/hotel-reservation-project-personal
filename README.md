@@ -46,8 +46,6 @@ mysql-docker/
 
 
 ## 📁 Project Structure
-
-```text
 hotel-reservation-project-personal/
 │
 ├── mysql-docker/                  # MySQL database container & initialization
