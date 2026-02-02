@@ -6,7 +6,7 @@ services:
     container_name: mysql_db
     restart: always
     env_file:
-      - ./mysql-docker/.env
+      - .env
     ports:
       - "3307:3306"
     volumes:
@@ -19,12 +19,12 @@ services:
     restart: always
     ports:
       - "8081:80"
-    environment:
-      PMA_HOST: mysql
-      PMA_USER: group9
-      PMA_PASSWORD: 1234
     depends_on:
       - mysql
+    environment:
+      PMA_HOST: mysql
+      PMA_USER: ${MYSQL_USER}
+      PMA_PASSWORD: ${MYSQL_PASSWORD}
 
   streamlit:
     build:
@@ -34,12 +34,14 @@ services:
       - "8501:8501"
     depends_on:
       - mysql
+    env_file:
+      - .env
     environment:
-      - DB_HOST=mysql
-      - DB_PORT=3306
-      - DB_USER=group9
-      - DB_PASSWORD=1234
-      - DB_NAME=hotel
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_USER: ${MYSQL_USER}
+      DB_PASSWORD: ${MYSQL_PASSWORD}
+      DB_NAME: ${MYSQL_DATABASE}
     volumes:
       - ./streamlit-app:/app
 
