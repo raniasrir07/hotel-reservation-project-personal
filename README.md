@@ -50,7 +50,7 @@ mysql-docker/
 
 
 
-
+## 📁 Project Structure
 hotel-reservation-project-personal/
 │
 ├── mysql-docker/                  # MySQL database container & initialization
