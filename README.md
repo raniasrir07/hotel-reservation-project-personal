@@ -39,7 +39,7 @@ Implemented SQL operations include:
 - SQL queries for data insertion and retrieval
 
 
-
+```md
 Database initialization scripts are located in:
 
 ```text
