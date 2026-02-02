@@ -1,8 +1,0 @@
-homepage:2 general oussama D
-agences:6 general + filtre Fatima ezahrae + bilal E
-chambres:6 general + filtre bouchra + adam F
-reservations:5 general + filtre chaimae + rania G
-Docker setup Bilal   A
-db connection and functions rania C
-mysql setup adam B
-
