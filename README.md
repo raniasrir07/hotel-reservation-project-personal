@@ -39,14 +39,16 @@ Implemented SQL operations include:
 - SQL queries for data insertion and retrieval
 
 Database initialization scripts are located in:
+
 ```text
 mysql-docker/
 
+```md
 ---
 
 ## 📁 Project Structure
-
 ```text
+
 hotel-reservation-project-personal/
 │
 ├── mysql-docker/                  # MySQL database container & initialization
